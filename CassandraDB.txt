@@ -1,0 +1,15 @@
+CREATE KEYSPACE dnm WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', '85' : 3, '23' : 3};
+
+USE dnm;
+
+CREATE TABLE  products(
+Date timestamp,
+Title text,
+Category text,
+Price float,
+Price_Dollar float,
+Vendor text,
+Market text,
+Ships_From text,
+Ships_To text,
+PRIMARY KEY (Title, Date))
