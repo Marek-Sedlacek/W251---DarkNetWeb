@@ -3,6 +3,7 @@ CREATE KEYSPACE dnm WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', '85
 USE dnm;
 
 CREATE TABLE  products(
+Title_Date text,
 Date timestamp,
 Title text,
 Category text,
@@ -12,4 +13,4 @@ Vendor text,
 Market text,
 Ships_From text,
 Ships_To text,
-PRIMARY KEY (Title, Date))
+PRIMARY KEY (Title_Date)) WITH COMPACT STORAGE;
