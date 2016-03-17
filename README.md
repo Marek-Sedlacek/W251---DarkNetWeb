@@ -1,5 +1,11 @@
 ## W251---DarkNetWeb
-#### Cleaning data from Tormarket
-On the DNM archives site (https://archive.org/download/dnmarchives), download the tormarket.tar.xz and extract. The cleaning code will extract data from the HTML files in the Products folder of this directory. There's more data than can be extracted from these files if we want.
+#### Data Source
+http://www.gwern.net/Black-market%20archives#download
 
-While each market scrape will be different, I imagine we can modify this code slightly and creat functions specific to the data we want for each market.
+https://archive.org/download/dnmarchives
+
+#### Loading Data
+Contains the scripts for building a Cassandrad DB, extracting data from the raw HTML files, and loading the resulting data to Cassandra
+
+#### Cleaning Data
+Scripts to clean some of the data extracted from the HTML files. This includes categorizing products and extracting additional features out of text description fields.
