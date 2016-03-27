@@ -130,7 +130,6 @@ if __name__ == "__main__":
 
 	#For each product in the raw data
 	for i in range(0, new.shape[0]):
-
 		x.append(find_weight(str(new.iloc[i,]["title"]))) #Search for weight
 		y.append(find_count(str(new.iloc[i,]["title"])))  #Search for count
 		c,d = find_category(new.iloc[i,])                 #Search for Category and SubCategory
