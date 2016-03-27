@@ -1,6 +1,16 @@
 import string
 import pandas as pd
 import numpy as np
+import datetime
+
+from cassandra.cluster import Cluster
+from cassandra.query import BatchStatement
+from cassandra.protocol import NumpyProtocolHandler, LazyProtocolHandler
+from cassandra.query import dict_factory
+
+cluster = Cluster(['158.85.217.74'])
+session = cluster.connect('dnm')
+session.row_factory = dict_factory
 
 Drugs = pd.read_csv("Drug Categories.csv")
 
@@ -114,11 +124,20 @@ def find_category(row):
 
 	
 if __name__ == "__main__":
-	#Read in raw scraped data
-	col = ['title_date','date','title','category','price','price_dollar','vendor','market','ships_from','ships_to']
-	new = pd.read_csv("temp_output.csv",delimiter=',',error_bad_lines =False, names=col)
-	new = new.drop(new.index[[0,1]])
-	new = new.reset_index(drop=True)
+	#Pull in data from Cassandra
+	result = session.execute("select * from products LIMIT 400000 ")
+
+	start_time = datetime.datetime.now()
+	df = pd.DataFrame()
+	df_temp = pd.DataFrame()
+	for i in result:    
+		df_temp = df_temp.from_dict(i,orient="index").transpose()
+		df = pd.concat([df,df_temp],axis=0)	
+		if i%1000==0 and i>0: print i		
+	print datetime.datetime.now()-start_time
+	
+	df = df.reset_index(drop=True)
+	new=df
 	
 	new["title"] = new["title"].str.strip(' ')
 	new["category"] = new["category"].str.strip(' ')
