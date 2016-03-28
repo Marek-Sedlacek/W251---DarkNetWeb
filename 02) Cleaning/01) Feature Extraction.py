@@ -130,7 +130,7 @@ def clean_text(row):
 	
 if __name__ == "__main__":
 	#Pull in data from Cassandra
-	result = session.execute("select * from products LIMIT 10000 ")
+	result = session.execute("select * from products LIMIT 400000 ")
 
 	start_time = datetime.datetime.now() #Record start time
 	df = pd.DataFrame()
