@@ -18,10 +18,23 @@ ID_FIELD = 'title_date'
 bulk_data2 = []
 
 #Read in cleaned data
-all2 = pd.read_csv("cleaned_output.csv")
+all2 = pd.read_csv("modeled_subcategories.csv")
+
+#Kibana will not load rows with NaN values
+#Replace null strings with "Missing" and null numerics with -1
+all2["category"] = all2["category"].fillna("Missing")
+all2["vendor"] = all2["vendor"].fillna("Missing")
+all2["ships_from"] = all2["ships_from"].fillna("Missing")
+all2["ships_to"] = all2["ships_to"].fillna("Missing")
+all2["SubCat2"] = all2["SubCat2"].fillna("Missing")
+all2["Cat2"] = all2["Cat2"].fillna("Missing")
+
+all2["Weight"] = all2["Weight"].fillna(-1)
+all2["PPW"] = all2["PPW"].fillna(-1)
+all2["PPWC"] = all2["PPWC"].fillna(-1)
 
 #Read through each listing in the data
-for row in range(0,all2.shape[0]):
+for row in range(0,all2.shape[0]): 
     data_dict = {}
 	#For each field in the row
     for i in range(0,all2.shape[1]):
