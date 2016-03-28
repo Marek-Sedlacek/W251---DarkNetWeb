@@ -132,15 +132,15 @@ if __name__ == "__main__":
 	#Pull in data from Cassandra
 	result = session.execute("select * from products LIMIT 10000 ")
 
-	start_time = datetime.datetime.now()
+	start_time = datetime.datetime.now() #Record start time
 	df = pd.DataFrame()
 	df_temp = pd.DataFrame()
 	for i in result:    
-		df_temp = df_temp.from_dict(i,orient="index").transpose()
-		df = pd.concat([df,df_temp],axis=0)		
-	print datetime.datetime.now()-start_time
+		df_temp = df_temp.from_dict(i,orient="index").transpose() #Convert the dictionary from Cassandra to a Dataframe
+		df = pd.concat([df,df_temp],axis=0) #Join the row to the total dataframe
+	print datetime.datetime.now()-start_time #Print run time
 	
-	df = df.reset_index(drop=True)
+	df = df.reset_index(drop=True) #Reset the index
 	new=df
 	
 	new["title"] = new["title"].str.strip(' ')
@@ -177,12 +177,24 @@ if __name__ == "__main__":
 	#Export new data to csv file
 	new.to_csv("cleaned_output2.csv",",",index=False)
 	
+	#Write query statment for adding data into Cassandra
 	insert_user = session.prepare("INSERT INTO products_clean (title_date,cat2,category,counts,date,market,ppw,ppwc,price,price_dollar,ships_from,ships_to,subcat2,title,weight,vendor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	#Create new Batch_Statment
 	batch = BatchStatement()
 
+	#Loop through every record in the dataframe
 	for i in range(0,df.shape[0]):
+		#Add the record to the Batch Update
 		batch.add(insert_user, (new["title_date"][i],new["Cat2"][i],new["category"][i],new["Count"][i],str(new["date"][i]),new["market"][i],new["PPW"][i],new["PPWC"][i],new["price"][i],new["price_dollar"][i], new["ships_from"][i],new["ships_to"][i],new["SubCat2"][i],new["title"][i],new["Weight"][i],new["vendor"][i]))
 	
+		#If the Batch Update contains 50,000 records, execute Batch Statement
+		if i%50000==0:
+			start_time = datetime.datetime.now()
+			session.execute(batch)
+			print datetime.datetime.now()-start_time #Print runtime
+			batch = BatchStatement() #Reset BatchStatement
+        
+	#Run final Batch Update
 	start_time = datetime.datetime.now()
 	session.execute(batch)
 	print datetime.datetime.now()-start_time
