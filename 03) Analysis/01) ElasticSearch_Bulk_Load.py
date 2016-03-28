@@ -18,7 +18,7 @@ ID_FIELD = 'title_date'
 bulk_data2 = []
 
 #Read in cleaned data
-all2 = pd.read_csv("modeled_subcategories.csv")
+all2 = pd.read_csv("cleaned_output.csv")
 
 #Read through each listing in the data
 for row in range(0,all2.shape[0]):
