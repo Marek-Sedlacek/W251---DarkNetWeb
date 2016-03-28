@@ -2,14 +2,16 @@ import string
 import pandas as pd
 import numpy as np
 import datetime
+import re
 
 from cassandra.cluster import Cluster
 from cassandra.query import BatchStatement
 from cassandra.protocol import NumpyProtocolHandler, LazyProtocolHandler
 from cassandra.query import dict_factory
 
-cluster = Cluster(['158.85.217.74'])
+cluster = Cluster(['158.85.217.74'],control_connection_timeout=None)
 session = cluster.connect('dnm')
+session.default_timeout = None
 session.row_factory = dict_factory
 
 Drugs = pd.read_csv("Drug Categories.csv")
@@ -120,20 +122,22 @@ def find_category(row):
         if word in y: return (Drugs["Subcategory"][i], Drugs["Category"][i])
         
     #If none of the lookup values are in the Title or the Category, use the original Category as Cat and SubCat
-    return (row["category"],row["category"])
+    orig_cat =  row["category"].decode('utf-8','ignore').encode("utf-8")
+    return (orig_cat,orig_cat)
 
+def clean_text(row):
+    return row.decode('unicode_escape').encode('ascii', 'ignore')
 	
 if __name__ == "__main__":
 	#Pull in data from Cassandra
-	result = session.execute("select * from products LIMIT 400000 ")
+	result = session.execute("select * from products LIMIT 10000 ")
 
 	start_time = datetime.datetime.now()
 	df = pd.DataFrame()
 	df_temp = pd.DataFrame()
 	for i in result:    
 		df_temp = df_temp.from_dict(i,orient="index").transpose()
-		df = pd.concat([df,df_temp],axis=0)	
-		if i%1000==0 and i>0: print i		
+		df = pd.concat([df,df_temp],axis=0)		
 	print datetime.datetime.now()-start_time
 	
 	df = df.reset_index(drop=True)
@@ -161,7 +165,9 @@ if __name__ == "__main__":
 	new["SubCat2"]=pd.DataFrame(a) #Create "SubCat2" field in data with results of find_category()
 	new["Cat2"]=pd.DataFrame(b)    #Create "Cat2" field in data with results of find_category()
 	
-	new.to_csv("cleaned_output.csv",",",index=False)
+	df['SubCat2'] = df['SubCat2'].apply(clean_text)
+	
+	new.to_csv("cleaned_output2.csv",",",index=False)
 
 	#Create new price metrics
 	new["price_dollar"]=pd.to_numeric(new["price_dollar"],errors='coerce') #Converts price_dollar to numeric 
@@ -169,9 +175,17 @@ if __name__ == "__main__":
 	new["PPWC"] = new["PPW"]/new["Count"] #Price per weight, controlling for count
 
 	#Export new data to csv file
-	new.to_csv("cleaned_output.csv",",",index=False)
+	new.to_csv("cleaned_output2.csv",",",index=False)
 	
+	insert_user = session.prepare("INSERT INTO products_clean (title_date,cat2,category,counts,date,market,ppw,ppwc,price,price_dollar,ships_from,ships_to,subcat2,title,weight,vendor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	batch = BatchStatement()
+
+	for i in range(0,df.shape[0]):
+		batch.add(insert_user, (new["title_date"][i],new["Cat2"][i],new["category"][i],new["Count"][i],str(new["date"][i]),new["market"][i],new["PPW"][i],new["PPWC"][i],new["price"][i],new["price_dollar"][i], new["ships_from"][i],new["ships_to"][i],new["SubCat2"][i],new["title"][i],new["Weight"][i],new["vendor"][i]))
 	
+	start_time = datetime.datetime.now()
+	session.execute(batch)
+	print datetime.datetime.now()-start_time
 	
 	
 	
