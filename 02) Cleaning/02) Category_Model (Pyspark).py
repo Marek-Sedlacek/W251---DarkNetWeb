@@ -53,8 +53,8 @@ def parsePoint(data):
 #All other categories will be classified as "Other"
 categories = ["Stimulants", "Ecstasy", "Cannabis", "Psychadelics", "Relaxants", "Opioids", "Sildenafil Citrate","Dissociatives","Analgesics","Steroids / PEDs"]
 
-#Read in data
-all = pd.read_csv("cleaned_output_lim.csv")
+#Read in cleaned data from feature extraction
+all = pd.read_csv("cleaned_output.csv")
 #Training data includes only those with a labeled Category
 train = all[pd.isnull(all["Cat2"])==False]
 
