@@ -14,3 +14,29 @@ Market text,
 Ships_From text,
 Ships_To text,
 PRIMARY KEY (Title_Date)) WITH COMPACT STORAGE;
+
+CREATE TABLE profiles(
+User_Date text,
+Username text,
+User_numposts text,
+User_type text,
+User_karma text,
+Date_registered text,
+Source text,
+PRIMARY KEY (User_Date)) WITH COMPACT STORAGE;
+
+CREATE TABLE topics(
+Author_Date_Responder_Date text,
+Topic text,
+Date text,
+Author text,
+Author_numposts text,
+Author_type text,
+Author_karma text,
+Response_date text,
+Responder text,
+Responder_numposts text,
+Responder_type text,
+Responder_karma text,
+Source text,
+PRIMARY KEY (Author_Date_Responder_Date)) WITH COMPACT STORAGE;
