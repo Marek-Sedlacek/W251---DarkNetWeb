@@ -13,7 +13,7 @@ Scripts to clean some of the data extracted from the HTML files. This includes c
 #### Analysis
 Exploration and analysis of the data. Part of the analysis was done within Spark, but the data was also loaded into Elasticsearch so it could be visually explored using Kibana.
 
-### Final Report
+#### Final Report
 Documents our process and methods in greater detail.
 
 #### Other Files
